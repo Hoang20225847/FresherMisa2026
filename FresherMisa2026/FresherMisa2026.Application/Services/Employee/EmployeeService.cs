@@ -6,7 +6,10 @@ using FresherMisa2026.Entities.Employee;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Data;
 namespace FresherMisa2026.Application.Services
+
+
 {
     public class EmployeeService : BaseService<Employee>, IEmployeeService
     {

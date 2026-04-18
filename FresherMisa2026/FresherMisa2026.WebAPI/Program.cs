@@ -17,7 +17,7 @@ builder.Services.AddSwaggerGen();
 //DI
 builder.Services.AddApplicationDI();
 builder.Services.AddInfrastructure();
-
+builder.Services.AddMemoryCache();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

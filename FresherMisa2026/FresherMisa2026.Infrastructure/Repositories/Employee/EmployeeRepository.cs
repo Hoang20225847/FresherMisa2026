@@ -3,44 +3,51 @@ using FresherMisa2026.Application.Extensions;
 using FresherMisa2026.Application.Interfaces.Repositories;
 using FresherMisa2026.Entities.Employee;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Caching.Memory;
 using System.Collections.Generic;
 using System.Text;
+using MySqlConnector;
+using System.Threading.Tasks;
+using System.Data;
 namespace FresherMisa2026.Infrastructure.Repositories
 {
     public class EmployeeRepository : BaseRepository<Employee>, IEmployeeRepository
     {
-        public EmployeeRepository(IConfiguration configuration) : base(configuration)
+        public EmployeeRepository(IConfiguration configuration,IMemoryCache cache) : base(configuration,cache)
         {
         }
 
         public async Task<Employee> GetEmployeeByCode(string code)
         {
-            await OpenConnectionAsync();
+            using var connection = new MySqlConnection(_connectionString);
+            await connection.OpenAsync();
             
             string query = SQLExtension.GetQuery("Employee.GetByCode");
             var param = new DynamicParameters();
             param.Add("@EmployeeCode", code);
-            return await _dbConnection.QueryFirstOrDefaultAsync<Employee>(query, param, commandType: System.Data.CommandType.Text);
+            return await connection.QueryFirstOrDefaultAsync<Employee>(query, param, commandType: System.Data.CommandType.Text);
         }
 
         public async Task<IEnumerable<Employee>> GetEmployeesByDepartmentId(Guid departmentId)
         {
-            await OpenConnectionAsync();
+            using var connection = new MySqlConnection(_connectionString);
+            await connection.OpenAsync();
             
             string query = SQLExtension.GetQuery("Employee.GetByDepartmentId");
             var param = new DynamicParameters();
             param.Add("@DepartmentID", departmentId);
-            return await _dbConnection.QueryAsync<Employee>(query, param, commandType: System.Data.CommandType.Text);
+            return await connection.QueryAsync<Employee>(query, param, commandType: System.Data.CommandType.Text);
         }
 
         public async Task<IEnumerable<Employee>> GetEmployeesByPositionId(Guid positionId)
         {
-            await OpenConnectionAsync();
+            using var connection = new MySqlConnection(_connectionString);
+            await connection.OpenAsync();
             
             string query = SQLExtension.GetQuery("Employee.GetByPositionId");
             var param = new DynamicParameters();
             param.Add("@PositionID", positionId);
-            return await _dbConnection.QueryAsync<Employee>(query, param, commandType: System.Data.CommandType.Text);
+            return await connection.QueryAsync<Employee>(query, param, commandType: System.Data.CommandType.Text);
         }
         public async Task<IEnumerable<Employee>> GetEmployeesByFilterAsync(
             Guid? departmentId,
@@ -51,7 +58,8 @@ namespace FresherMisa2026.Infrastructure.Repositories
             DateTime? hireDateFrom,
             DateTime? hireDateTo)
         {
-            await OpenConnectionAsync();
+            using var connection = new MySqlConnection(_connectionString);
+            await connection.OpenAsync();
             var query = new StringBuilder("SELECT * FROM Employee WHERE 1=1");
             var parameters = new DynamicParameters();
 
@@ -97,7 +105,7 @@ namespace FresherMisa2026.Infrastructure.Repositories
                 parameters.Add("@HireDateTo", hireDateTo.Value);
             }
 
-            return await _dbConnection.QueryAsync<Employee>(query.ToString(), parameters);
+            return await connection.QueryAsync<Employee>(query.ToString(), parameters);
         }
     }
 }
