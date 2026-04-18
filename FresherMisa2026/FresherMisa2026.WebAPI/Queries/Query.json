@@ -3,5 +3,7 @@
   "Position.GetByCode": "SELECT * FROM Position WHERE PositionCode=@PositionCode",
   "Employee.GetByCode": "SELECT * FROM Employee WHERE EmployeeCode=@EmployeeCode",
   "Employee.GetByDepartmentId": "SELECT * FROM Employee WHERE DepartmentID=@DepartmentID",
-  "Employee.GetByPositionId": "SELECT * FROM Employee WHERE PositionID=@PositionID"
+  "Employee.GetByPositionId": "SELECT * FROM Employee WHERE PositionID=@PositionID",
+  "Department.GetEmployeesByCode": "SELECT e.* FROM Employee e INNER JOIN Department d ON e.DepartmentID = d.DepartmentID WHERE d.DepartmentCode = @DepartmentCode",
+"Department.GetEmployeeCountByCode": "SELECT COUNT(*) FROM Employee e INNER JOIN Department d ON e.DepartmentID = d.DepartmentID WHERE d.DepartmentCode = @DepartmentCode"
 }
