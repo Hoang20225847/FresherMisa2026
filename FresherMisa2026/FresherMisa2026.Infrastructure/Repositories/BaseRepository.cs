@@ -13,7 +13,35 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace FresherMisa2026.Infrastructure.Repositories
-{
+{   
+    /// <summary>
+    /// Type handler for Guid to string conversion in MySQL
+    /// </summary>
+    public class GuidTypeHandler : SqlMapper.TypeHandler<Guid>
+    {
+        public override Guid Parse(object value)
+        {   Console.WriteLine($"value: {value}");
+            if (value == null || value is DBNull)
+                return Guid.Empty;
+            if (value is Guid guid)
+                {
+                Guid checkne = guid;
+                    return guid;
+                }
+            if (value is string str)
+                return Guid.Parse(str);
+            if (value is byte[] bytes)
+                return new Guid(bytes);
+            return Guid.Parse(value.ToString()!);
+        }
+
+        public override void SetValue(IDbDataParameter parameter, Guid value)
+        {
+            parameter.DbType = DbType.String;
+            parameter.Value = value.ToString();
+        }
+    }
+
     /// <summary>
     /// Base repository
     /// </summary>
@@ -27,6 +55,12 @@ namespace FresherMisa2026.Infrastructure.Repositories
         protected IDbConnection _dbConnection = null;
         protected string _tableName;
         public Type _modelType = null;
+
+        //Static constructor to register Guid type handler once
+        static BaseRepository()
+        {
+            SqlMapper.AddTypeHandler(new GuidTypeHandler());
+        }
 
 
         //Constructor
@@ -56,7 +90,7 @@ namespace FresherMisa2026.Infrastructure.Repositories
         /// <summary>
         /// Mở kết nối database
         /// </summary>
-        private async Task OpenConnectionAsync()
+        protected async Task OpenConnectionAsync()
         {
             if (_dbConnection.State != ConnectionState.Open)
             {
@@ -166,7 +200,7 @@ namespace FresherMisa2026.Infrastructure.Repositories
                     var keyName = _modelType.GetKeyName();
 
                     var dynamicParams = new DynamicParameters();
-                    dynamicParams.Add($"@v_{keyName}", entityId);
+                    dynamicParams.Add($"@v_{keyName}", entityId.ToString());
 
                     //2. Kết nối tới CSDL:
                     rowAffects = await _dbConnection.ExecuteAsync($"Proc_Delete{_tableName}ById", param: dynamicParams, transaction: transaction, commandType: CommandType.StoredProcedure);
@@ -226,6 +260,7 @@ namespace FresherMisa2026.Infrastructure.Repositories
         /// <param name="entity">Thông tin bản ghi</param>
         /// <returns>Số bản ghi bị ảnh hưởng</returns>
         /// CREATED BY: DVHAI (11/07/2021)
+        /// UPDATE BY:HNGUYEN(17/4/2026)
         public async Task<int> UpdateAsync(Guid entityId, TEntity entity)
         {
             var rowAffects = 0;
@@ -235,12 +270,13 @@ namespace FresherMisa2026.Infrastructure.Repositories
             {
                 try
                 {
-                    //1. Duyệt các thuộc tính trên customer và tạo parameters
-                    var parameters = MappingDbType(entity);
-
-                    //2. Ánh xạ giá trị id
+                    
+                    //1. Ánh xạ giá trị id
                     var keyName = _modelType.GetKeyName();
                     entity.GetType().GetProperty(keyName).SetValue(entity, entityId);
+                    //2. Duyệt các thuộc tính trên customer và tạo parameters
+                    var parameters = MappingDbType(entity);
+                    Console.WriteLine($"[DEBUG] Parameters: @v_EmployeeID = {parameters.Get<string>("@v_EmployeeID")}");
 
                     //3. Kết nối tới CSDL:
                     rowAffects = await _dbConnection.ExecuteAsync($"Proc_Update{_tableName}", param: parameters, transaction: transaction, commandType: CommandType.StoredProcedure);
@@ -317,7 +353,7 @@ namespace FresherMisa2026.Infrastructure.Repositories
                     var propertyType = property.PropertyType;
 
                     if (propertyType == typeof(Guid) || propertyType == typeof(Guid?))
-                        parameters.Add($"@v_{propertyName}", propertyValue, DbType.String);
+                        parameters.Add($"@v_{propertyName}", propertyValue?.ToString(), DbType.String);
                     else
                         parameters.Add($"@v_{propertyName}", propertyValue);
                 }

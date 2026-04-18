@@ -28,11 +28,11 @@ namespace FresherMisa2026.Infrastructure.Repositories
         /// CREATED BY: dvhai (09/04/2026)
         public async Task<Department> GetDepartmentByCode(string code)
         {
+            await OpenConnectionAsync();
+            
             string query = SQLExtension.GetQuery("Department.GetByCode");
-            var @param = new Dictionary<string, object>
-            {
-                {"@DepartmentCode", code }
-            };
+            var @param = new DynamicParameters();
+            @param.Add("@DepartmentCode", code);
             return await _dbConnection.QueryFirstOrDefaultAsync<Department>(query, @param, commandType: System.Data.CommandType.Text);
         }
     }

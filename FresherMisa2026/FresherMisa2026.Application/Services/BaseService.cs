@@ -194,6 +194,17 @@ namespace FresherMisa2026.Application.Services
         public async Task<ServiceResponse> InsertAsync(TEntity entity)
         {
             entity.State = ModelSate.Add;
+            var entityType = typeof(TEntity);
+            // Tự động generate GUID mới cho key property nếu là Guid.Empty
+            var keyProperty = typeof(TEntity).GetKeyProperty();
+            if (keyProperty != null && keyProperty.PropertyType == typeof(Guid))
+            {
+                var currentValue = (Guid)keyProperty.GetValue(entity);
+                if (currentValue == Guid.Empty)
+                {
+                    keyProperty.SetValue(entity, Guid.NewGuid());
+                }
+            }
 
             //1. Validate tất cả các trường nếu được gắn thẻ
             var errors = Validate(entity);

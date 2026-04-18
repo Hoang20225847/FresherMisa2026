@@ -2,6 +2,6 @@
   "Department.GetByCode": "SELECT * FROM Department WHERE DepartmentCode=@DepartmentCode",
   "Position.GetByCode": "SELECT * FROM Position WHERE PositionCode=@PositionCode",
   "Employee.GetByCode": "SELECT * FROM Employee WHERE EmployeeCode=@EmployeeCode",
-  "Employee.GetByDepartmentId": "SELECT * FROM Employee WHERE DepartmentID=@DepartmentID AND IsDeleted = FALSE",
-  "Employee.GetByPositionId": "SELECT * FROM Employee WHERE PositionID=@PositionID AND IsDeleted = FALSE"
+  "Employee.GetByDepartmentId": "SELECT * FROM Employee WHERE DepartmentID=@DepartmentID",
+  "Employee.GetByPositionId": "SELECT * FROM Employee WHERE PositionID=@PositionID"
 }

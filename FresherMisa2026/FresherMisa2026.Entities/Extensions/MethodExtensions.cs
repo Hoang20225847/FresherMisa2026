@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Reflection;
 using System.Text;
 
 namespace FresherMisa2026.Entities.Extensions
@@ -92,6 +93,16 @@ namespace FresherMisa2026.Entities.Extensions
             ;
 
             return key.Name;
+        }
+
+        /// <summary>
+        /// Lấy property khóa chính
+        /// </summary>
+        /// <returns></returns>
+        public static PropertyInfo? GetKeyProperty(this Type type)
+        {
+            var properties = type.GetProperties();
+            return properties.FirstOrDefault(f => f.IsDefined(typeof(KeyAttribute), true));
         }
     }
 }
