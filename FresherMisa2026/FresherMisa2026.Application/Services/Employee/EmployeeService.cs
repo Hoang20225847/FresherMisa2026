@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Data;
+
 namespace FresherMisa2026.Application.Services
 
 
@@ -115,17 +116,19 @@ namespace FresherMisa2026.Application.Services
         /// </summary>
         /// <returns>Danh sách employee theo filter</returns>
         /// CREATED BY: NHoang(17/4/2026)
-        public async Task<IEnumerable<Employee>> GetEmployeesByFilterAsync(
+        public async Task<PagingResponse<Employee>> GetEmployeesByFilterAsync(
             Guid? departmentId,
             Guid? positionId,
             decimal? salaryFrom,
             decimal? salaryTo,
             int? gender,
             DateTime? hireDateFrom,
-            DateTime? hireDateTo)
+            DateTime? hireDateTo,
+            int pageSize = 10,
+            int pageIndex = 1)
         {
             return await _employeeRepository.GetEmployeesByFilterAsync(
-                departmentId, positionId, salaryFrom, salaryTo, gender, hireDateFrom, hireDateTo);
+                departmentId, positionId, salaryFrom, salaryTo, gender, hireDateFrom, hireDateTo, pageSize, pageIndex);
         }
     }
 }

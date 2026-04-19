@@ -9,6 +9,8 @@ using System.Text;
 using MySqlConnector;
 using System.Threading.Tasks;
 using System.Data;
+using FresherMisa2026.Entities;
+
 namespace FresherMisa2026.Infrastructure.Repositories
 {
     public class EmployeeRepository : BaseRepository<Employee>, IEmployeeRepository
@@ -49,18 +51,35 @@ namespace FresherMisa2026.Infrastructure.Repositories
             param.Add("@PositionID", positionId);
             return await connection.QueryAsync<Employee>(query, param, commandType: System.Data.CommandType.Text);
         }
-        public async Task<IEnumerable<Employee>> GetEmployeesByFilterAsync(
+        /// <summary>
+        /// Lấy danh sách nhân viên theo filter
+        /// </summary>
+        /// <param name="departmentId">Mã phòng ban</param>
+        /// <param name="positionId">Mã chức vụ</param>
+        /// <param name="salaryFrom">Mức lương từ</param>
+        /// <param name="salaryTo">Mức lương đến</param>
+        /// <param name="gender">Giới tính</param>
+        /// <param name="hireDateFrom">Ngày tuyển dụng từ</param>
+        /// <param name="hireDateTo">Ngày tuyển dụng đến</param>
+        /// <param name="pageSize">Số bản ghi mỗi trang</param>
+        /// <param name="pageIndex">Chỉ số trang</param>
+        /// <returns>Danh sách nhân viên</returns>
+        /// CREATED BY: NHoang (17/04/2026)
+        /// UPDATED BY: NHoang (19/04/2026) THÊM PAGING
+        public async Task<PagingResponse<Employee>> GetEmployeesByFilterAsync(
             Guid? departmentId,
             Guid? positionId,
             decimal? salaryFrom,
             decimal? salaryTo,
             int? gender,
             DateTime? hireDateFrom,
-            DateTime? hireDateTo)
+            DateTime? hireDateTo,
+            int pageSize = 10,
+            int pageIndex = 1)
         {
             using var connection = new MySqlConnection(_connectionString);
             await connection.OpenAsync();
-            var query = new StringBuilder("SELECT * FROM Employee WHERE 1=1");
+            var query = new StringBuilder("WHERE 1=1");
             var parameters = new DynamicParameters();
 
             if (departmentId.HasValue)
@@ -104,8 +123,26 @@ namespace FresherMisa2026.Infrastructure.Repositories
                 query.Append(" AND HireDate <= @HireDateTo");
                 parameters.Add("@HireDateTo", hireDateTo.Value);
             }
+            //lấy tổng số bản ghi
+            
 
-            return await connection.QueryAsync<Employee>(query.ToString(), parameters);
+            var countSql = $"SELECT COUNT(*) FROM Employee {query.ToString()}";
+            var total = await connection.ExecuteScalarAsync<long>(countSql, parameters);
+
+            
+            var offset = pageSize * (pageIndex - 1);
+            parameters.Add("@PageSize", pageSize);
+            parameters.Add("@Offset", offset);
+            var dataSql = $"SELECT * FROM Employee {query.ToString()} LIMIT @PageSize OFFSET @Offset";
+            var data = (await connection.QueryAsync<Employee>(dataSql, parameters)).ToList();
+
+            return new PagingResponse<Employee>
+            {
+                Total = total,
+                PageSize = pageSize,
+                PageIndex = pageIndex,
+                Data = data
+            };
         }
     }
 }
