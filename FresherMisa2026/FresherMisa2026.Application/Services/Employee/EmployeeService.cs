@@ -46,7 +46,7 @@ namespace FresherMisa2026.Application.Services
         /// </summary>
         /// <returns>Danh sách lỗi validate</returns>
         /// CREATED BY: NHoang(17/4/2026)
-        protected override async Task<List<ValidationError>> ValidateCustom(Employee employee)
+        protected override async Task<List<ValidationError>> ValidateCustom(Employee employee,Guid? entityId = null)
         {
             var errors = new List<ValidationError>();
         //validate employee code: length > 20 and not exist
@@ -58,10 +58,14 @@ namespace FresherMisa2026.Application.Services
                 }
                 else{
                         var existingEmployee = await _employeeRepository.GetEmployeeByCode(employee.EmployeeCode);
-                    if (existingEmployee != null)
-                    {
-                        errors.Add(new ValidationError("EmployeeCode", "Mã nhân viên đã tồn tại"));
-                    }
+                        
+                   bool isDuplicate = existingEmployee != null 
+                        && (!entityId.HasValue || existingEmployee.EmployeeID != entityId.Value);
+            
+                        if (isDuplicate)
+                        {
+                            errors.Add(new ValidationError("EmployeeCode", "Mã nhân viên đã tồn tại"));
+                        }
                 }
               
 

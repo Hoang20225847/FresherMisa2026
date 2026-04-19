@@ -72,7 +72,7 @@ namespace FresherMisa2026.Application.Services
         /// <summary>
         /// Validate tùy chỉnh cho Department
         /// </summary>
-        protected override async Task<List<ValidationError>> ValidateCustom(Department department)
+        protected override async Task<List<ValidationError>> ValidateCustom(Department department,Guid? entityId = null)
         {
             var errors = new List<ValidationError>();
 

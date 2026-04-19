@@ -117,12 +117,13 @@ namespace FresherMisa2026.Application.Services
         }
 
         /// <summary>
-        /// Validate tất cả
+        /// Validate tất cả- overload với entityId cho UPDATE
         /// </summary>
         /// <param name="entity">Thực thể</param>
         /// <returns>Danh sách lỗi validate</returns>
         /// CREATED BY: DVHAI (07/07/2021)
-        private async Task<List<ValidationError>> Validate(TEntity entity)
+        /// UPDATED BY: NHoang (19/04/2026) - overload với entityId cho UPDATE
+        private async Task<List<ValidationError>> Validate(TEntity entity,Guid? entityId)
         {
             var errors = new List<ValidationError>();
             var properties = GetCachedProperties(entity.GetType());
@@ -141,7 +142,7 @@ namespace FresherMisa2026.Application.Services
             }
 
             //2. Validate tùy chỉnh từng màn hình
-            var customErrors =await ValidateCustom(entity);
+            var customErrors =await ValidateCustom(entity,entityId);
             errors.AddRange(customErrors);
 
             return errors;
@@ -179,7 +180,7 @@ namespace FresherMisa2026.Application.Services
         /// <param name="entity">Thực thể</param>
         /// <returns>Danh sách lỗi tùy chỉnh</returns>
         /// CREATED BY: DVHAI (07/07/2021)
-        protected virtual async Task<List<ValidationError>> ValidateCustom(TEntity entity)
+        protected virtual async Task<List<ValidationError>> ValidateCustom(TEntity entity,Guid? entityId = null)
         {
             return new List<ValidationError>();
         }
@@ -207,7 +208,7 @@ namespace FresherMisa2026.Application.Services
             }
 
             //1. Validate tất cả các trường nếu được gắn thẻ
-            var errors =await Validate(entity);
+            var errors =await Validate(entity,null);
 
             //2. Sử lí lỗi tương ứng
             if (errors.Count == 0)
@@ -230,6 +231,7 @@ namespace FresherMisa2026.Application.Services
         /// <param name="entity">Thông tin bản ghi</param>
         /// <returns>ServiceResponse chứa kết quả</returns>
         /// CREATED BY: DVHAI (11/07/2021)
+        /// UPDATED BY: NHoang (19/04/2026) - overload với entityId cho UPDATE
         public async Task<ServiceResponse> UpdateAsync(Guid entityId, TEntity entity)
         {
             if (entityId == Guid.Empty)
@@ -241,7 +243,7 @@ namespace FresherMisa2026.Application.Services
             entity.State = ModelSate.Update;
 
             //2. Validate tất cả các trường nếu được gắn thẻ
-            var errors =await Validate(entity);
+            var errors =await Validate(entity,entityId);
             
             if (errors.Count == 0)
             {

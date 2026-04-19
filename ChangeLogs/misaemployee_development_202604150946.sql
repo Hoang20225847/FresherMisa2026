@@ -878,4 +878,8 @@ INSERT INTO department VALUES
 -- 
 -- Enable foreign keys
 -- 
+--
+-- Add unique constraint for EmployeeCode
+--
+ALTER TABLE employee ADD UNIQUE INDEX UQ_EmployeeCode (EmployeeCode);
 /*!40014 SET FOREIGN_KEY_CHECKS = @OLD_FOREIGN_KEY_CHECKS */;
